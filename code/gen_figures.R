@@ -17,7 +17,7 @@ a <- 0.005
 phi_0 <- 0.065
 
 # domain for fund flow sensitivity
-rspace <- seq(-0.5, 0.5, 0.001) 
+rspace <- seq(-0.4, 0.4, 0.001) 
 
 # domain for default threshold
 grid.lambda <- seq(from = 0.001, to = 0.1, by = 0.001)  
@@ -30,17 +30,19 @@ rho_line <- seq(0, 8, by = 0.01)
 
 ################################################################################
 # graphics settings and plotting tools ------------------------------------
-options(tikzDocumentDeclaration = "\\documentclass[12pt]{article}")
+options(tikzDocumentDeclaration = "\\documentclass[12pt, a4paper]{article}")
 
 theme_custom <- function() {
   theme_bw() + theme(legend.title = element_blank(),
                      legend.key = element_blank(),
                      legend.background = element_blank(),
+                     legend.position = "bottom",
                      plot.title = element_text(hjust = 0.5))
 }
 
 grid_arrange_shared_legend <- function(..., ncol = length(list(...)), nrow = 1, 
                                        position = c("bottom", "right")) {
+  # source: https://github.com/tidyverse/ggplot2/wiki/Share-a-legend-between-two-ggplot2-graphs
   plots <- list(...)
   position <- match.arg(position)
   g <- ggplotGrob(plots[[1]] + theme(legend.position = position))$grobs
@@ -121,7 +123,7 @@ eta.comp2 <- as.data.frame(cbind(rspace,
                                  ffs(rspace, phi_0, 0, 0.02, 10, default = F)))
 names(eta.comp2) <- c("r", "eta1", "eta2", "eta3")
 
-g3 <- ggplot(eta.comp1, aes(r)) +
+g1 <- ggplot(eta.comp1, aes(r)) +
   geom_line(aes(y = eta1, linetype = "$\\eta = 0$"), size = 1) +
   geom_line(aes(y = eta2, linetype = "$\\eta = 0.01$"), size = 1) +
   geom_line(aes(y = eta3, linetype = "$\\eta = 0.02$"), size = 1) +
@@ -132,7 +134,7 @@ g3 <- ggplot(eta.comp1, aes(r)) +
   scale_y_continuous(expand = c(0,0)) + 
   theme_custom()
 
-g4 <- ggplot(eta.comp2, aes(r)) +
+g2 <- ggplot(eta.comp2, aes(r)) +
   geom_line(aes(y = eta1, linetype = "$\\eta = 0$"), size = 1) +
   geom_line(aes(y = eta2, linetype = "$\\eta = 0.01$"), size = 1) +
   geom_line(aes(y = eta3, linetype = "$\\eta = 0.02$"), size = 1) +
@@ -144,7 +146,7 @@ g4 <- ggplot(eta.comp2, aes(r)) +
   theme_custom()
 
 tikz(file = "output/ffs_eta.tex", width = 6, height = 3.5)
-grid_arrange_shared_legend(g3, g4, nrow = 1, ncol = 2)
+grid_arrange_shared_legend(g1, g2, nrow = 1, ncol = 2)
 dev.off()
 
 # figure 3: ffs for different lambdas without default
@@ -160,7 +162,7 @@ lambda.comp2 <- as.data.frame(cbind(rspace,
                                     ffs(rspace, phi_0, 0.04, 0, 10, default = F)))
 names(lambda.comp2) <- c("r", "lambda1", "lambda2", "lambda3")
 
-g1 <- ggplot(lambda.comp1, aes(r)) +
+g3 <- ggplot(lambda.comp1, aes(r)) +
   geom_line(aes(y = lambda1, linetype = "$\\lambda = 0$"), size = 1) +
   geom_line(aes(y = lambda2, linetype = "$\\lambda = 0.02$"), size = 1) +
   geom_line(aes(y = lambda3, linetype = "$\\lambda = 0.04$"), size = 1) +
@@ -171,7 +173,7 @@ g1 <- ggplot(lambda.comp1, aes(r)) +
   scale_y_continuous(expand = c(0,0)) + 
   theme_custom()
 
-g2 <- ggplot(lambda.comp2, aes(r)) +
+g4 <- ggplot(lambda.comp2, aes(r)) +
   geom_line(aes(y = lambda1, linetype = "$\\lambda = 0$"), size = 1) +
   geom_line(aes(y = lambda2, linetype = "$\\lambda = 0.02$"), size = 1) +
   geom_line(aes(y = lambda3, linetype = "$\\lambda = 0.04$"), size = 1) +
@@ -183,7 +185,7 @@ g2 <- ggplot(lambda.comp2, aes(r)) +
   theme_custom()
 
 tikz(file = "output/ffs_lambda.tex", width = 6, height = 3.5)
-grid_arrange_shared_legend(g1, g2, nrow = 1, ncol = 2)
+grid_arrange_shared_legend(g3, g4, nrow = 1, ncol = 2)
 dev.off()
 
 # figure 5: comparison with berk & green with default
@@ -197,28 +199,28 @@ bg.compare2 <- as.data.frame(cbind(rspace,
                                    ffs(rspace, phi_0, 0.09, 0.02, 10, default = T)))
 names(bg.compare2) <- c("r", "bg", "us")
 
-g7 <- ggplot(bg.compare1, aes(r)) +
-  geom_line(aes(y = bg, linetype = "$\\lambda = 0, \\eta = 0$"), size = 1) +
-  geom_line(aes(y = us, linetype = "$\\lambda = 0.09, \\eta = 0.02$"), size = 1) +
+g5 <- ggplot(bg.compare1, aes(r)) +
+  geom_line(aes(y = bg, linetype = "$\\lambda = 0$, $\\eta = 0$"), size = 1) +
+  geom_line(aes(y = us, linetype = "$\\lambda = 0.09$, $\\eta = 0.02$"), size = 1) +
   labs(x = "$r_t$", y = "$n_t(r_t, \\varphi_{t-1})$", 
        title = "$t = 1$") +
   coord_cartesian(ylim = c(-1, 2)) + 
-  scale_x_continuous(expand = c(0,0)) + 
-  scale_y_continuous(expand = c(0,0)) + 
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_continuous(expand = c(0, 0)) + 
   theme_custom()
 
-g8 <- ggplot(bg.compare2, aes(r)) +
-  geom_line(aes(y = bg, linetype = "$\\lambda = 0, \\eta = 0$"), size = 1) +
-  geom_line(aes(y = us, linetype = "$\\lambda = 0.09, \\eta = 0.02$"), size = 1) +
+g6 <- ggplot(bg.compare2, aes(r)) +
+  geom_line(aes(y = bg, linetype = "$\\lambda = 0$, $\\eta = 0$"), size = 1) +
+  geom_line(aes(y = us, linetype = "$\\lambda = 0.09$, $\\eta = 0.02$"), size = 1) +
   labs(x = "$r_t$", y = "$n_t(r_t, \\varphi_{t-1})$", 
        title = "$t = 10$") +
   coord_cartesian(ylim = c(-1, 2)) + 
-  scale_x_continuous(expand = c(0,0)) + 
-  scale_y_continuous(expand = c(0,0)) + 
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_continuous(expand = c(0, 0)) + 
   theme_custom()
 
 tikz(file = "output/ffs_compare.tex", width = 6, height = 3.5)
-grid_arrange_shared_legend(g7, g8, nrow = 1, ncol = 2)
+grid_arrange_shared_legend(g5, g6, nrow = 1, ncol = 2)
 dev.off()
 
 ################################################################################
@@ -244,7 +246,7 @@ rstar.lambda <- tibble(rstar_1 = r_star(phi_0, grid.lambda, 0, 1),
                        rstar_10 = r_star(phi_0, grid.lambda, 0, 10),
                        lambda = grid.lambda)
 
-p1 <- ggplot(rstar.lambda, aes(x = lambda)) +
+g7 <- ggplot(rstar.lambda, aes(x = lambda)) +
   geom_line(aes(y = rstar_1, linetype = "$t = 1$"), size = 1) +
   geom_line(aes(y = rstar_10, linetype = "$t = 10$"), size = 1) +
   labs(x = "$\\lambda$", y = "$r^*(\\varphi_{t-1})$") +
@@ -256,7 +258,7 @@ rstar.eta<- tibble(rstar_1 = r_star(phi_0, 0, grid.eta, 1),
                    rstar_10 = r_star(phi_0, 0, grid.eta, 10),
                    eta = grid.eta)
 
-p2 <- ggplot(rstar.eta, aes(x = eta)) +
+g8 <- ggplot(rstar.eta, aes(x = eta)) +
   geom_line(aes(y = rstar_1, linetype = "$t = 1$"), size = 1) +
   geom_line(aes(y = rstar_10, linetype = "$t = 10$"), size = 1) +
   labs(x = "$\\eta$", y = "$r^*(\\varphi_{t-1})$") +
@@ -265,7 +267,7 @@ p2 <- ggplot(rstar.eta, aes(x = eta)) +
   theme_custom()
 
 tikz(file = "output/rstar_lambda_eta.tex", width = 6, height = 3.5)
-grid_arrange_shared_legend(p1, p2, nrow = 1, ncol = 2)
+grid_arrange_shared_legend(g7, g8, nrow = 1, ncol = 2)
 dev.off()
 
 ################################################################################
